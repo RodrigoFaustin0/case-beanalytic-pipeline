@@ -6,60 +6,56 @@ OUTPUT_DIR = "data/bronze/mobilidade_bh"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def baixar_ultimo_csv(page, nome_arquivo):
+def download_resource(page, target_locator, nome_arquivo):
     """
-    Abre o último recurso da lista e baixa o CSV
+    Recebe um locator (li), abre o menu e faz o download.
     """
-    ultimo_li = page.locator("li.resource-item").last
+    # abre o dropdown 'EXPLORAR' do item 
+    target_locator.locator("a.dropdown-toggle").click()
 
-    # abre dropdown
-    ultimo_li.locator("a.dropdown-toggle").click()
-
+    # clica em 'Baixar' e aguarda o evento de download
     with page.expect_download() as download_info:
-        ultimo_li.locator("a:has-text('Baixar')").click()
+        target_locator.locator("a:has-text('Baixar')").click()
 
     download = download_info.value
-    caminho = f"{OUTPUT_DIR}/{nome_arquivo}"
+    caminho = os.path.join(OUTPUT_DIR, nome_arquivo)
     download.save_as(caminho)
+    print(f"sucesso: {nome_arquivo} salvo em {OUTPUT_DIR}")
 
-    print(f"Arquivo salvo em: {caminho}")
+def run_bronze_ingestion():
+    """Roda o processo de ingestão dos datasets da mobilidade urbana de BH."""
+    
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(accept_downloads=True)
+        page = context.new_page()
+        
+        # Acessa a página principal
+        print(f"Acessando {BASE_URL}...")
+        page.goto(BASE_URL)
 
+        # ===================================
+        # DATASET 1 — MCO (Último da lista)
+        # ==================================
+        print("Acessando MCO...")
+        page.get_by_role("link",name="Mapa de Controle Operacional (MCO) Consolidado",exact=True).first.click()
+        
+        # Pega o último li.resource-item da página (o mais recente)
+        target_mco = page.locator("li.resource-item").last
+        download_resource(page, target_mco, "mco_consolidado.csv")
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    context = browser.new_context(accept_downloads=True)
-    page = context.new_page()
+        # ============================================
+        # DATASET 2 — Tempo Real (Filtrado por texto)
+        # ============================================
+        print("Voltando para a página inicial...")
+        page.goto(BASE_URL)
+        
+        print("Entrando em Tempo Real Ônibus - Coordenada atualizada...")
+        page.get_by_role("link",name="Tempo Real Ônibus - Coordenada atualizada",exact=True).first.click()
+        
+        # Pega o li.resource-item que contém o texto exato 'ARQUIVO CSV'
+        target_tempo_real = page.locator("li.resource-item").filter(has_text="ARQUIVO CSV")
+        download_resource(page, target_tempo_real, "onibus_tempo_real.csv")
 
-    # =========================
-    # DATASET 1 — MCO
-    # =========================
-    print("Acessando Mobilidade Urbana...")
-    page.goto(BASE_URL)
+        browser.close()
 
-    print("Entrando no MCO...")
-    page.get_by_role(
-        "link",
-        name="Mapa de Controle Operacional (MCO) Consolidado",
-        exact=True
-    ).first.click()
-
-    print("Baixando CSV do MCO...")
-    baixar_ultimo_csv(page, "mco_consolidado.csv")
-
-    # =========================
-    # DATASET 2 — Tempo Real Ônibus
-    # =========================
-    print("Voltando para a página inicial...")
-    page.goto(BASE_URL)
-
-    print("Entrando em Tempo Real Ônibus - Coordenada atualizada...")
-    page.get_by_role(
-        "link",
-        name="Tempo Real Ônibus - Coordenada atualizada",
-        exact=True
-    ).first.click()
-
-    print("Baixando CSV de Tempo Real Ônibus...")
-    baixar_ultimo_csv(page, "onibus_tempo_real.csv")
-
-    browser.close()
