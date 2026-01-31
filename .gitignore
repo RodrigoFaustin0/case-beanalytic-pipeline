@@ -1,0 +1,16 @@
+# Dados locais
+data/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Variáveis de ambiente
+.env
+
+# Spark / Delta
+spark-warehouse/
+.metastore_db/
+
+# Logs
+*.log
