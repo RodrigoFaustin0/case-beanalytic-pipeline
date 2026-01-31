@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright
 import os
 
 BASE_URL = "https://dados.pbh.gov.br/group/mobilidade-urbana"
-OUTPUT_DIR = "data/bronze"
+OUTPUT_DIR = "data/bronze/mobilidade_bh"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

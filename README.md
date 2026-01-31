@@ -29,7 +29,7 @@ beanalytic-pipeline/
 │ └── utils/
 │
 ├── tests/
-│ │
+│ 
 ├── diagrams/
 │ 
 │
@@ -38,6 +38,11 @@ beanalytic-pipeline/
 ├── README.md
 └── .gitignore
 ```  
+
+## Desenvolvimento
+
+* As dependências foram versionadas com intervalos compatíveis, priorizando estabilidade e reprodutibilidade do pipeline evitando impactos entre versões maiores.
+
 
 
 \___________________________________
