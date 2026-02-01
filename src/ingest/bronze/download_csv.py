@@ -29,6 +29,9 @@ def run_bronze_ingestion():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
+
+        # define um timeout maior 
+        page.set_default_timeout(2*60*1000)
         
         # Acessa a página principal
         print(f"Acessando {BASE_URL}...")
