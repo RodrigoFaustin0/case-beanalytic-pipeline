@@ -2,8 +2,8 @@ import os
 import pandas as pd
 from datetime import datetime
 
-BRONZE_PATH = "data/bronze/mobilidade_bh"
-SILVER_PATH = "data/silver/mobilidade_bh"
+bronze_path = "data/bronze/mobilidade_bh"
+silver_path = "data/silver/mobilidade_bh"
 
 def processar_mco(df):
     """Lógica específica para a base MCO"""
@@ -17,6 +17,31 @@ def processar_mco(df):
     for col in ['saida', 'chegada']:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], format='%H:%M', errors="coerce").dt.time
+    
+    # renomeia colunas  
+    df = df.rename(columns={       
+        'viagem': 'viagem_data',
+        'linha': 'linha_numero',
+        'sublinha': 'sublinha_numero',
+        'pc': 'ponto_controle_numero',
+        'concessionaria': 'concessionaria_numero',
+        'saida': 'hora_saida',
+        'veiculo': 'numero_ordem_veiculo',
+        'chegada': 'hora_chegada',
+        'catraca saida': 'catraca_saida',
+        'catraca chegada': 'catraca_chegada',
+        'ocorrencia': 'indicador_ocorrencia',
+        'justificativa': 'indicador_justificativa',
+        'tipo dia': 'tipo_dia',
+        'extensao': 'extensao_viagem',
+        'falha mecanica': 'indicador_falha_mecanica',
+        'evento inseguro': 'indicador_evento_inseguro',
+        'indicador fechamento': 'indicador_fechamento',
+        'data fechamento': 'data_fechamento_viagem',
+        'total usuarios': 'total_usuarios_viagem',
+        'empresa operadora': 'empresa_operadora'
+    })
+    
     return df
 
 def processar_tempo_real(df):
@@ -29,23 +54,42 @@ def processar_tempo_real(df):
         errors="coerce"
     )
     
+    # renomeia colunas
+    df = df.rename(columns={       
+        'ev': 'codigo_evento',
+        'hr': 'data_hora',
+        'lt': 'latitude',
+        'lg': 'longitude',
+        'nv': 'numero_ordem_veiculo',
+        'vl': 'velocidade_instantanea',
+        'nl': 'codigo_numero_linha',
+        'dg': 'direcao_veiculo',
+        'sv': 'sentido_veiculo',
+        'dt': 'distancia_percorrida'    
+    })
+
+
+
     return df
 
 def run_silver():
     """Direciona cada arquivo para sua função de processamento."""
-    os.makedirs(SILVER_PATH, exist_ok=True)
+    os.makedirs(silver_path, exist_ok=True)
 
-    for file in os.listdir(BRONZE_PATH):
+    for file in os.listdir(bronze_path):
         if not file.endswith(".csv"):
             continue
 
         print(f"Silver - lendo {file}")
         
         # tenta ler com separador padrão, se falhar ou vier 1 coluna só, tenta ';'
-        df = pd.read_csv(os.path.join(BRONZE_PATH, file), sep=None, engine='python')
+        df = pd.read_csv(os.path.join(bronze_path, file), sep=None, engine='python')
 
-        # padronizar nomes de colunas
+        # padronizar nomes de colunas (minusculo e espaços)
         df.columns = [c.lower().strip() for c in df.columns]
+
+        # remove colunas totalmente vazias
+        df = df.dropna(axis=1, how='all')
 
         # edentifica o tipo de arquivo pelas colunas e aplica a função correta
         if 'viagem' in df.columns and 'saida' in df.columns:
@@ -63,6 +107,6 @@ def run_silver():
 
         # salvar em Parquet
         output_file = file.replace(".csv", ".parquet")
-        df.to_parquet(os.path.join(SILVER_PATH, output_file), index=False)
+        df.to_parquet(os.path.join(silver_path, output_file), index=False)
         print(f"Arquivo silver gerado: {output_file}")
 
