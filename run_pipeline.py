@@ -4,7 +4,7 @@ from src.transform.silver.clean_data import run_silver
 
 
 def main():
-    print("*******************************")
+    print("\n*******************************")
     print("Iniciando a pipeline BeAnalytic")
     print("*******************************")
 
