@@ -68,7 +68,17 @@ def processar_tempo_real(df):
         'dt': 'distancia_percorrida'    
     })
 
-
+    
+    # correção de tipo, lat/long
+    cols_geo = ['latitude', 'longitude']
+    
+    for col in cols_geo:
+        if col in df.columns:
+            # Substitui vírgula por ponto | Se der erro na conversão, vira NaT/NaN 
+            df[col] = pd.to_numeric(
+                df[col].astype(str).str.replace(',', '.'), 
+                errors='coerce'
+            )
 
     return df
 
