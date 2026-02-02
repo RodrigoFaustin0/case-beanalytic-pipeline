@@ -98,7 +98,7 @@ docker-compose up -d
 ```
 localhost:8080 
 ```
-5. Espere alguns minutos para o host ser carregado, e pronto, você terá acesso ao página inicial do Airflow
+5. Espere alguns minutos para o host ser carregado, e pronto, você terá acesso ao página inicial do Airflow, as credenciais são (login:admin e senha:admin).
 
     ![Execução run_pipeline](docs/img/pagina_inicial_airflow.png)
 
