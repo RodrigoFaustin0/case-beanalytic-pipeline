@@ -19,16 +19,20 @@ Construir um pipeline de dados que:
 ```
 beanalytic-pipeline/
 │
+├── airflow
+│ ├── dags/
+│ ├── Dockerfile
+│ ├── docker-compose.yml
+|
+|
 ├── Data
 │ ├── bronze/
-│ │ 
 │ ├── silver/
-│ │ 
 │ ├── gold/
+|
 |
 ├── src/
 │ ├── ingest/
-│ │ 
 │ ├── transform/
 │ 
 │
@@ -41,8 +45,8 @@ beanalytic-pipeline/
 | ├── architecture_diagram.jpg
 |
 |
-├── Dockerfile
 ├── requirements.txt
+├── requirements-dev.txt
 ├── README.md
 ├── .gitignore
 └── run_pipeline.py
@@ -52,9 +56,8 @@ beanalytic-pipeline/
 ## Desenvolvimento
 
 * As dependências foram versionadas com intervalos compatíveis, priorizando estabilidade e reprodutibilidade do pipeline evitando impactos entre versões maiores.
-* Incremental - As tabelas fato utilizam carga incremental por data_key,datas já processadas não são reprocessadas
+* Incremental - As tabelas fato utilizam carga incremental por data_key, datas já processadas não são reprocessadas
 * Pipeline preparado para execução diária via Airflow
-* O diagrama de arquitetura está na pasta docs/
 
 
 ## Diagrama de Arquitetura
@@ -72,8 +75,9 @@ beanalytic-pipeline/
 ## Instruções de execução
 
 Requisitos básicos para executar a pipeline:
-* docker instalado
-* python
+* Docker
+* Python 3.11+
+* Git
 
 Execução:
 
@@ -81,35 +85,50 @@ Execução:
 ```
 git clone https://github.com/RodrigoFaustin0/case-beanalytic-pipeline.git
 ```
-2. baixar a imagem docker ou executar o build
+2. Acessar a pasta airflow 
 ```
-docker build --no-cache -t be-pepiline .
+cd airflow
 ```
-3. Executar o container docker  
+3. Executar
+```
+docker-compose up -d
+```
+4. Aguardar subir os serviços e depois acessar
 
 ```
-docker run -v ${PWD}/data:/app/data be-pepiline
+localhost:8080 
 ```
-4. Após esses passos, os arquivos serão salvos em 
+5. Espere alguns minutos para o host ser carregado, e pronto, você terá acesso ao página inicial do Airflow
 
-```
-bronze - silver - gold
-```
+    ![Execução run_pipeline](docs/img/pagina_inicial_airflow.png)
+
+6. A partir daí, terá a DAGs 'mobilidade_bh_pipeline' disponível para execução
+
+7. Retorno da execução
+
+    ![Execução run_pipeline](docs/img/execução_run_pipeline_airflow.png)
+
 
 ## Testes de qualidade
 
-1. Executar o seguinte comando
+1. Acessar o Airflow
 
 ```
-docker run --rm -v ${PWD}/data:/app/data be-pipeline pytest -q
+localhost:8080
 ```
 
-2. Que terá como retorno
+2. Executar a DAG 'mobilidade_bh_testes'
 
-![Retorno Testes](docs/img/retorno_tests.png)
+3. Retorno da execução
+
+    ![Execução run_pipeline](docs/img/execução_testes_airflow.png)
+    ## Melhorias futuras
+
+* Incluir Minio para armazenar os dados  
 
 
-\___________________________________
+
+\_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 Desenvolvedor:  
 Rodrigo Faustino ([linkedIn](https://www.linkedin.com/in/rodrigofaustino-/))   

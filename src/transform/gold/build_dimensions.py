@@ -6,6 +6,7 @@ seguindo um padrão de esquema em estrela para o pipeline de análise de mobilid
 """
 from pathlib import Path
 import pandas as pd
+import hashlib
 
 SILVER_DIR = Path("data/silver/mobilidade_bh")
 GOLD_DIR = Path("data/gold/mobilidade_bh")
@@ -13,6 +14,15 @@ GOLD_DIR.mkdir(parents=True, exist_ok=True)
 
 MCO_PATH = SILVER_DIR / "mco_consolidado.parquet"
 TR_PATH = SILVER_DIR / "onibus_tempo_real.parquet"
+
+def generate_hash_key(val) -> int:
+    """Gera um ID numérico consistente baseado no valor (seja ele texto ou número)."""
+    if pd.isna(val) or val == "":
+        return -1 
+    
+    val_str = str(val) 
+    
+    return int(hashlib.sha256(val_str.encode('utf-8')).hexdigest(), 16) % 10**8
 
 
 def build_dim_data(mco: pd.DataFrame, tr: pd.DataFrame) -> pd.DataFrame:
@@ -94,7 +104,8 @@ def build_dim_linha(mco: pd.DataFrame, tr: pd.DataFrame) -> pd.DataFrame:
         .sort_values("linha")
         .reset_index(drop=True)
     )
-    dim_linha["linha_key"] = dim_linha.index + 1
+    
+    dim_linha["linha_key"] = dim_linha["linha"].apply(generate_hash_key)
 
     return dim_linha
 
@@ -116,7 +127,8 @@ def build_dim_concessionaria(mco: pd.DataFrame) -> pd.DataFrame:
         .sort_values("concessionaria_numero")
         .reset_index(drop=True)
     )
-    dim["concessionaria_key"] = dim.index + 1
+    
+    dim["concessionaria_key"] = dim["concessionaria_numero"].apply(generate_hash_key)
 
     return dim
 
@@ -138,7 +150,8 @@ def build_dim_empresa(mco: pd.DataFrame) -> pd.DataFrame:
         .sort_values("empresa_operadora")
         .reset_index(drop=True)
     )
-    dim["empresa_key"] = dim.index + 1
+
+    dim["empresa_key"] = dim["empresa_operadora"].apply(generate_hash_key)
 
     return dim
 
@@ -169,7 +182,8 @@ def build_dim_veiculo(mco: pd.DataFrame, tr: pd.DataFrame) -> pd.DataFrame:
         .sort_values("veiculo_id")
         .reset_index(drop=True)
     )
-    dim["veiculo_key"] = dim.index + 1
+    
+    dim["veiculo_key"] = dim["veiculo_id"].apply(generate_hash_key)
 
     return dim
 
