@@ -62,6 +62,13 @@ beanalytic-pipeline/
 ![Arquitetura do Pipeline](docs/architecture_diagram.jpg)
 
 
+## Dicionário de dados (Gold)
+
+
+[data_dictionary_gold.md](docs/data_dictionary_gold.md)
+
+
+
 ## Instruções de execução
 
 Requisitos básicos para executar a pipeline:
